@@ -3,11 +3,11 @@ package com.example.demo.entity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
-
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
-
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
@@ -16,13 +16,24 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
     @NotEmpty(message = "This field must not be empty")
     private String employeeName;
+
+    @NotEmpty(message = "Email must not be empty")
+    @Email(message = "Invalid email format")
+    @Column(unique = true)
+    private String email;
+
+    @NotEmpty(message = "Password must not be empty")
+    private String password;
+
     private String address;
     private long phoneNo;
 
-    @NotEmpty(message = "DOJ must not be empty")
+    @NotNull(message = "DOJ must not be empty")
     private long doj;
+
     private String managerName;
     private int leave;
     private long punchIn;
@@ -35,8 +46,7 @@ public class Employee {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-
-
+    // Getters and Setters
 
     public long getId() {
         return id;
@@ -52,6 +62,22 @@ public class Employee {
 
     public void setEmployeeName(String employeeName) {
         this.employeeName = employeeName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getAddress() {
@@ -95,14 +121,12 @@ public class Employee {
     }
 
     public long getPunchIn() {
-
         return punchIn;
     }
 
     public void setPunchIn(long punchIn) {
         this.punchIn = punchIn;
     }
-
 
     public long getPunchOut() {
         return punchOut;
@@ -133,9 +157,10 @@ public class Employee {
         return "Employee{" +
                 "id=" + id +
                 ", employeeName='" + employeeName + '\'' +
+                ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
                 ", phoneNo=" + phoneNo +
-                ", doj='" + doj + '\'' +
+                ", doj=" + doj +
                 ", managerName='" + managerName + '\'' +
                 ", leave=" + leave +
                 ", punchIn=" + punchIn +
