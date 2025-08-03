@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.common.Response;
+import com.example.demo.dto.EmployeeSummaryDTO;
 import com.example.demo.entity.Employee;
 import com.example.demo.entity.Role;
 import com.example.demo.repository.EmployeeRepository;
@@ -13,9 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService{
@@ -30,7 +30,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 
 
     @Override
-    @Transactional
     public Response<Employee> createEmployee(Employee employee) {
         Response<Employee> response = new Response<>();
 
@@ -38,9 +37,6 @@ public class EmployeeServiceImpl implements EmployeeService{
             if (employeeRepository.existsByEmail(employee.getEmail())) {
                 throw new RuntimeException("Employee already exists with email: " + employee.getEmail());
             }
-
-            String encodedPassword = passwordEncoder.encode(employee.getPassword());
-            employee.setPassword(encodedPassword);
 
             // Resolve roles
             employee.setRoles(resolveRoles(employee.getRoles()));
@@ -130,7 +126,8 @@ public class EmployeeServiceImpl implements EmployeeService{
         return "Employee with ID " + id + " deleted successfully.";
     }
 
-    private Set<Role> resolveRoles(Set<Role> inputRoles) {
+    private Set<Role>
+    resolveRoles(Set<Role> inputRoles) {
         Set<Role> resolvedRoles = new HashSet<>();
 
         if (inputRoles == null || inputRoles.isEmpty()) {
@@ -149,6 +146,29 @@ public class EmployeeServiceImpl implements EmployeeService{
         }
 
         return resolvedRoles;
+    }
+
+    @Override
+    public Map<String, List<EmployeeSummaryDTO>> getEmployeesGroupedByManager() {
+        List<Employee> employees = employeeRepository.findAllByOrderByManagerNameAsc();
+
+        return employees.stream()
+                .filter(emp -> emp.getManagerName() != null && !emp.getManagerName().isEmpty())
+                .collect(Collectors.groupingBy(
+                        Employee::getManagerName,
+                        Collectors.mapping(
+                                emp -> new EmployeeSummaryDTO(emp.getEmployeeName(), emp.getEmail()),
+                                Collectors.toList()
+                        )
+                ));
+    }
+
+    @Override
+    public List<EmployeeSummaryDTO> getEmployeesByManager(String managerName) {
+        List<Employee> employees = employeeRepository.findByManagerName(managerName);
+        return employees.stream()
+                .map(emp -> new EmployeeSummaryDTO(emp.getEmployeeName(), emp.getEmail()))
+                .collect(Collectors.toList());
     }
 
 }

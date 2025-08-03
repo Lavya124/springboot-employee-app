@@ -13,39 +13,42 @@ import java.util.Set;
 @Entity
 public class Employee {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.AUTO)
+        private long id;
 
-    @NotEmpty(message = "This field must not be empty")
-    private String employeeName;
+        @NotEmpty(message = "This field must not be empty")
+        private String employeeName;
 
-    @NotEmpty(message = "Email must not be empty")
-    @Email(message = "Invalid email format")
-    @Column(unique = true)
-    private String email;
+        @NotEmpty(message = "Email must not be empty")
+        @Email(message = "Invalid email format")
+        @Column(unique = true)
+        private String email;
 
-    @NotEmpty(message = "Password must not be empty")
-    private String password;
+        @NotEmpty(message = "Password must not be empty")
+        private String password;
 
-    private String address;
-    private long phoneNo;
+        private String address;
+        private long phoneNo;
 
-    @NotNull(message = "DOJ must not be empty")
-    private long doj;
+        @NotNull(message = "DOJ must not be empty")
+        private long doj;
 
-    private String managerName;
-    private int leave;
-    private long punchIn;
-    private long punchOut;
-    private double salary;
+        private String managerName;
+        private int leave;
+        private long punchIn;
+        private long punchOut;
+        private double salary;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "employee_roles",
-            joinColumns = @JoinColumn(name = "employee_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+        @ManyToMany(fetch = FetchType.EAGER)
+        @JoinTable(name = "employee_roles",
+                joinColumns = @JoinColumn(name = "employee_id"),
+                inverseJoinColumns = @JoinColumn(name = "role_id"))
+        private Set<Role> roles = new HashSet<>();
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_login_id")
+    private UserLogin userLogin;
     // Getters and Setters
 
     public long getId() {
@@ -150,6 +153,15 @@ public class Employee {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+
+    public UserLogin getUserLogin() {
+        return userLogin;
+    }
+
+    public void setUserLogin(UserLogin userLogin) {
+        this.userLogin = userLogin;
     }
 
     @Override
